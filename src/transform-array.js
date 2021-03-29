@@ -1,43 +1,39 @@
 const CustomError = require("../extensions/custom-error");
 
 module.exports = function transform( arr ) {
+
   let a  = [...arr];
-
-  const shadowElements = (el,i) => {
-    a[i][1] = typeof el;
-  } 
-
-  a.forEach(shadowElements);
-  
-  //throw new CustomError('Not implemented');
-  // remove line with error and write your code here
+  let res = [];
 
   if (!Array.isArray(arr)) throw new CustomError('Input data is not an array.');
-  let res = [];
-  
-  let delNext = false;
-  let dblNext = false;
 
   const handleArr = (el, i) => {
-    // console.log(`${i} : ${el}`);
 
-    if (dblNext) {
-      dblNext = false;
-      res.push();
-      res.push();
-      return;
-   }
-
-    if (delNext) {
-       delNext = false;
-       return;
-    }
-
-    switch (el){
-      case "--discard-next" : {delNext=true; return;}   
-      case "--discard-prev" : {res.pop(); return; }
-      case "--double-next" : {dblNext = true; return;}
-      case "--double-prev" : {let x=res.pop(); res.push(x);res.push(x);}
+  switch (el){
+      case "--discard-next" : {
+        if (i<a.length-1){
+            a.splice(i+1,1);
+        }
+        break;
+      }   
+      case "--discard-prev" : {
+        if (i>1 && a[i-1] !== "--discard-next") {
+            res.pop();
+        }
+        break; 
+      }
+      case "--double-next" : {
+        if (i<a.length-1) {
+            res.push(a[i+1]);
+        }
+        break;
+      }
+      case "--double-prev" : {
+        if (i>1 && a[i-1] !== "--discard-next") {
+          res.push(res[i-1]);
+        }
+        break;
+      }
       default :
       res.push(el);
     }
@@ -45,10 +41,6 @@ module.exports = function transform( arr ) {
 
   a.forEach(handleArr);
   
-res.filter(x => x !== undefined);
-
-console.log(a);
-return a;
-
+return res;
 
 };
